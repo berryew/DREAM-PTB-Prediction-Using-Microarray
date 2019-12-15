@@ -1,0 +1,73 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+# install required CRAN packages
+for (pkg in c("BiocManager", "data.table", "httr", "FactoMineR", "dendextend")) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg)
+  }
+}
+
+# install required Bioc packages
+for (pkg in c("limma", "DESeq2", "org.Hs.eg.db", "ReactomePA")) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    BiocManager::install(pkg, update = FALSE, ask = FALSE)
+  }
+}
+```
+
+#### Load the eset file
+```{r}
+library(data.table)
+library(limma)
+# change the file path to where you download the count table
+DATA <- "C:/Users/berryew/Desktop/DREAM"
+eset_file_path <- "eset_SC2_v20.csv"
+# load the count table, set check.names to FALSE so R doesn't rename your columns! Otherwise it will automatically convert special characters into "."
+rc <- data.frame(fread(file.path(DATA, eset_file_path)), row.names=1, check.names = FALSE)
+head(rc)
+```
+
+#### Load the annotation file
+```{r}
+annot <- data.frame(fread(file.path(DATA, "anoSC2_v20_nokey.csv")), row.names = 1, check.names = FALSE)
+head(annot)
+```
+
+#### Select training samples
+```{r}
+train = annot[which(annot$Train == 1), ]
+X = rc[, which(colnames(rc) %in% rownames(train))]
+head(X)
+```
+
+
+#### Create the design, fit the data, and get the top 1000 for category (either "sPTD" or "PPROM"), similar to the steps in homowork2
+```{r}
+category = "sPTD"
+# category = "PPROM"
+sample_meta <- data.frame(train['Group'] == category)
+head(sample_meta)
+
+# create the design matrix
+design <- model.matrix(~Group, data=sample_meta)
+head(design)
+
+# use a linear model to fit and a Bayes method to provide stable inference
+fit <- lmFit(X, design)
+fit <- eBayes(fit)
+tp = topTable(fit, coef="GroupTRUE", number=1000)
+head(tp)
+
+# save the top tables
+# write.csv(tp, paste("C:/Users/berryew/Desktop/DREAM/topTable1000_", category, ".csv", sep=""))
+```

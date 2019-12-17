@@ -7,3 +7,5 @@ As a team participant of [DREAM Preterm Birth Prediction Challenge, Transcriptom
 In the folder `data`,
 - The two top tables store top 1000 differentially expression genes (sorted by P value) in Control vs. sPTD and Control vs. PPROM respectively, created in R using the package `limma`. They can be reproduced in `DREAM_Differential expression analysis.Rmd`.
 - The concordance results store top survival-related genes (sorted by absolute difference between the concordance indices and 0.5, higher indicates more influential), created in Python using the library `lifelines`. They can be reproduced in `DREAM_Survival analysis.ipynb`.
+- `Supplementary Table S1.xlsx` stores the results of gene ontology analysis that contains gene IDs for each significantly
+regulated biological processes.
